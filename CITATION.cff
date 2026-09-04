@@ -6,6 +6,5 @@ version: 0.1.0
 date-released: 2026-09-04
 license: MIT
 authors:
-  - family-names: "To be completed"
-    given-names: "To be completed"
+  - name: "christalho22"
 repository-code: "https://github.com/christalho22/RATIO-DIA"
