@@ -13,13 +13,18 @@ can produce a giant connected component.
 
 1. Reads centroided MGF spectra.
 2. Calculates modified-cosine similarity or reuses an existing edge table.
-3. Applies a reciprocal Top-*K* neighborhood constraint.
-4. Detects non-overlapping topology-focused spectral modules.
-5. Calculates fraction-level recovery indices from biological responses.
-6. Integrates feature abundance, target-fraction enrichment, and agreement with
+3. Extracts orthogonal evidence from weighted edge-clustering values (ECV),
+   single-fragment TF-IDF, and co-occurring fragment-pair TF-IDF.
+4. Reweights original spectral edges and augments them with the union of
+   node-wise motif neighborhoods; reciprocal membership is not required.
+5. Applies weighted Louvain partitioning over a fixed multiresolution grid.
+   Representative features may calibrate partition selection, while activity
+   labels remain excluded from network construction.
+6. Calculates fraction-level recovery indices from biological responses.
+7. Integrates feature abundance, target-fraction enrichment, and agreement with
    the activity gradient to assign Tier 1 and Tier 2 candidates.
-7. Exports node, edge, module-summary, and focused-network tables for Cytoscape.
-8. Optionally evaluates module structural coherence using all CHON candidate
+8. Exports node, edge, module-summary, and focused-network tables for Cytoscape.
+9. Optionally evaluates module structural coherence using all available candidate
    structures rather than only the top-ranked annotation.
 
 ## Installation
@@ -54,11 +59,17 @@ ratio-dia \
   --output outputs/demo \
   --min-cosine 0.70 \
   --min-matched-peaks 6 \
-  --top-k 5 \
-  --top-k-mode mutual \
-  --mode weak \
-  --hcpin-threshold 1.0 \
-  --min-module-size 3
+  --min-module-size 3 \
+  --partition-method relation-aware \
+  --input-scope edge-connected \
+  --pair-motif-weight 0.25 \
+  --motif-k 15 \
+  --motif-minimum 0.10 \
+  --fragmentation-floor 0.10 \
+  --topology-floor 0.25 \
+  --motif-scale 0.80 \
+  --louvain-resolution 2.25 \
+  --random-seed 20260914
 ```
 
 Windows PowerShell uses backticks instead of backslashes for multiline commands,
@@ -77,13 +88,15 @@ ratio-dia --mgf study.mgf --edges-in modified_cosine_edges.csv \
 
 | File | Purpose |
 |---|---|
+| `00_run_parameters.json` | Complete parameters and evidence-feature counts for the run |
 | `01_filtered_similarity_edges.csv` | Similarity-thresholded network before Top-*K* focusing |
 | `02_nodes_with_modules_and_D_labels.csv` | Node attributes, module IDs, and activity scores |
-| `03_edges_with_modules.csv` | Focused edges with topology and module assignments |
+| `03_edges_with_modules.csv` | Original and motif-neighborhood relationships with all evidence layers and module assignments |
 | `04_module_summary.csv` | Module size, density, mean similarity, and fraction abundance |
 | `05_D_focused_nodes.csv` | Nodes in modules containing Tier 1/2 candidates |
 | `06_D_focused_edges.csv` | Internal edges of candidate-containing modules |
 | `07_D_active_marker_mz_by_module.csv` | Prioritized candidate features by module |
+| `08_parameter_search.csv` | Full calibration grid, produced only with `--parameter-search` |
 
 For Cytoscape, import `03_edges_with_modules.csv` as an undirected network using
 `Source_Scan` and `Target_Scan`, then import `02_nodes_with_modules_and_D_labels.csv`
@@ -110,8 +123,18 @@ confirmed identification.
 
 ## Reproducibility and interpretation
 
-- Record the MGF export settings, mass tolerances, similarity threshold, minimum
-  matched peaks, Top-*K*, module condition, and minimum module size.
+- Record the MGF export settings, mass tolerances, modified-cosine threshold,
+  minimum matched peaks, fragment filters, motif-neighborhood settings, Louvain
+  resolution, fixed search grid, representative-feature list, and random seed.
+- `relation-aware` is the reported default. It uses the complete thresholded
+  graph as the original spectral layer and a nonreciprocal union motif
+  neighborhood as an orthogonal relation layer. A nonzero `--top-k` remains an
+  optional sensitivity analysis and is not part of the reported workflow.
+- `ecv-consensus` and `ecv-hierarchy` are retained only for legacy reproduction
+  and sensitivity analyses.
+- Representative features used in `--parameter-search` calibrate the partition;
+  they are not an independent validation set. Activity measurements are mapped
+  only after module construction.
 - `Module_ID = 0` denotes nodes not assigned to a module meeting the minimum size.
 - A topology-focused spectral module is not automatically a confirmed compound
   family or a causal bioactivity mechanism.

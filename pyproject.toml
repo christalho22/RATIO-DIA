@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ratio-dia"
-version = "0.1.0"
-description = "Activity-guided topology focusing for DIA-MS/MS molecular networks"
+version = "0.5.0"
+description = "Relation-aware multi-evidence organization of DIA-MS/MS molecular networks"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [{name = "RATIO-DIA authors"}]
-dependencies = ["numpy>=1.23"]
+dependencies = ["numpy>=1.23", "networkx>=3.2"]
 keywords = ["mass spectrometry", "DIA", "molecular networking", "natural products"]
 
 [project.scripts]
