@@ -11,8 +11,9 @@ The validated default combines modified-cosine similarity, weighted local
 edge-clustering support, single-fragment TF-IDF, and fragment-pair co-occurrence
 TF-IDF. Motif-neighborhood relationships are defined from the union of node-wise
 high-ranking fragmentation-pattern similarities; reciprocal membership is not
-required. A fixed parameter grid can be calibrated with representative features,
-but fraction-level activity labels are introduced only after module construction.
+required. A fixed parameter grid can be optimized using the co-clustering of
+predefined target feature ions, but fraction-level activity labels are introduced
+only after module construction.
 Results are *relation-aware spectral modules*, not confirmed compound families.
 
 The implementation is self-contained apart from NumPy. Existing edge CSV files
@@ -716,10 +717,10 @@ def calibrate_relation_parameters(node_ids, spectra, edges, representatives,
                                   relative_intensity_cutoff=0.005,
                                   single_top_peaks=100, pair_top_peaks=40,
                                   bin_width=0.02):
-    """Run the fixed 1,008-candidate grid used for target-guided calibration."""
+    """Run the fixed 1,008-candidate grid for target-ion-guided optimization."""
     representatives = set(representatives)
     if not representatives:
-        raise ValueError("Parameter calibration requires representative nodes")
+        raise ValueError("Parameter optimization requires target feature nodes")
     prepared = prepare_relation_evidence(
         node_ids, spectra, edges, relative_intensity_cutoff,
         single_top_peaks, pair_top_peaks, bin_width
@@ -1127,10 +1128,11 @@ def parse_args():
     p.add_argument("--fragment-bin-width", type=float, default=.02)
     p.add_argument("--louvain-resolution", type=float, default=2.25)
     p.add_argument("--max-module-size", type=int, default=100)
-    p.add_argument("--representative-nodes",
-                   help="Comma-separated IDs or a one-column text file used only for calibration")
+    p.add_argument("--target-feature-nodes", "--representative-nodes",
+                   dest="target_feature_nodes",
+                   help="Comma-separated IDs or a one-column text file of feature ions used for parameter optimization")
     p.add_argument("--parameter-search", action="store_true",
-                   help="Run the fixed 1,008-candidate calibration grid")
+                   help="Run the fixed 1,008-candidate parameter-optimization grid")
     p.add_argument("--ecv-power", type=float, default=2.0)
     p.add_argument("--consensus-base-resolution", type=float, default=2.0)
     p.add_argument("--consensus-final-resolution", type=float, default=2.5)
@@ -1139,7 +1141,7 @@ def parse_args():
     return p.parse_args()
 
 
-def parse_representative_nodes(value):
+def parse_target_feature_nodes(value):
     if not value:
         return []
     path = Path(value)
@@ -1196,9 +1198,9 @@ def main():
     feature_counts = {}
     if args.partition_method == "relation-aware":
         if args.parameter_search:
-            representatives = parse_representative_nodes(args.representative_nodes)
+            target_features = parse_target_feature_nodes(args.target_feature_nodes)
             best, search_rows = calibrate_relation_parameters(
-                nodes, selected_spectra, edges, representatives,
+                nodes, selected_spectra, edges, target_features,
                 args.max_module_size, args.random_seed,
                 args.relative_intensity_cutoff, args.single_top_peaks,
                 args.pair_top_peaks, args.fragment_bin_width

@@ -49,18 +49,19 @@ Thus an original edge that also belongs to the motif neighborhood receives an
 additive motif contribution, whereas a previously absent motif edge is assigned
 \(\beta M_{ij}\) without being required to satisfy the modified-cosine cutoff.
 
-## Multiresolution topology partition and calibration
+## Multiresolution topology partition and parameter optimization
 
 Weighted Louvain partitions are generated over a fixed parameter grid. The
 module-size constraint is applied during candidate-partition selection rather
-than within Louvain optimization. Eligible partitions are ranked
-lexicographically by: (1) the number of representative features recovered in a
-single module, (2) the compactness of that target module, (3) representative-
-pair co-clustering, (4) coverage of nodes in modules containing more than 10
-nodes, and (5) weighted modularity. Representative features therefore serve as
-a calibration set and not an independent validation set. Candidate structures,
-fraction abundances, and activity measurements do not enter graph construction
-or partition optimization.
+than within Louvain optimization. Before structural identification, target
+feature ions including precursor ions at *m/z* 571.2803, 518.2184, and 559.2807
+together with related signals are used to define the parameter-optimization
+objective. Eligible partitions are ranked lexicographically by: (1) the number
+of target feature ions co-clustered in one module, (2) the compactness of that
+module, (3) target-ion pair co-clustering, (4) coverage of nodes in modules
+containing more than 10 nodes, and (5) weighted modularity. Structural
+identities, fraction abundances, and activity measurements do not enter graph
+construction or determine module boundaries.
 
 For the reported dataset, the selected configuration used pair-motif weight
 0.25, motif top-15 union neighborhoods, minimum motif similarity 0.10,

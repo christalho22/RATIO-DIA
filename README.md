@@ -18,8 +18,9 @@ can produce a giant connected component.
 4. Reweights original spectral edges and augments them with the union of
    node-wise motif neighborhoods; reciprocal membership is not required.
 5. Applies weighted Louvain partitioning over a fixed multiresolution grid.
-   Representative features may calibrate partition selection, while activity
-   labels remain excluded from network construction.
+   Target feature ions, including signals at *m/z* 571.2803, 518.2184, and
+   559.2807, may guide parameter optimization, while activity labels remain
+   excluded from network construction.
 6. Calculates fraction-level recovery indices from biological responses.
 7. Integrates feature abundance, target-fraction enrichment, and agreement with
    the activity gradient to assign Tier 1 and Tier 2 candidates.
@@ -96,7 +97,7 @@ ratio-dia --mgf study.mgf --edges-in modified_cosine_edges.csv \
 | `05_D_focused_nodes.csv` | Nodes in modules containing Tier 1/2 candidates |
 | `06_D_focused_edges.csv` | Internal edges of candidate-containing modules |
 | `07_D_active_marker_mz_by_module.csv` | Prioritized candidate features by module |
-| `08_parameter_search.csv` | Full calibration grid, produced only with `--parameter-search` |
+| `08_parameter_search.csv` | Full parameter-optimization grid, produced only with `--parameter-search` |
 
 For Cytoscape, import `03_edges_with_modules.csv` as an undirected network using
 `Source_Scan` and `Target_Scan`, then import `02_nodes_with_modules_and_D_labels.csv`
@@ -125,16 +126,16 @@ confirmed identification.
 
 - Record the MGF export settings, mass tolerances, modified-cosine threshold,
   minimum matched peaks, fragment filters, motif-neighborhood settings, Louvain
-  resolution, fixed search grid, representative-feature list, and random seed.
+  resolution, fixed search grid, target-feature-ion list, and random seed.
 - `relation-aware` is the reported default. It uses the complete thresholded
   graph as the original spectral layer and a nonreciprocal union motif
   neighborhood as an orthogonal relation layer. A nonzero `--top-k` remains an
   optional sensitivity analysis and is not part of the reported workflow.
 - `ecv-consensus` and `ecv-hierarchy` are retained only for legacy reproduction
   and sensitivity analyses.
-- Representative features used in `--parameter-search` calibrate the partition;
-  they are not an independent validation set. Activity measurements are mapped
-  only after module construction.
+- Target feature ions used in `--parameter-search` define the optimization
+  objective. Their structural identities and activity measurements do not enter
+  graph construction; activity is mapped only after module construction.
 - `Module_ID = 0` denotes nodes not assigned to a module meeting the minimum size.
 - A topology-focused spectral module is not automatically a confirmed compound
   family or a causal bioactivity mechanism.

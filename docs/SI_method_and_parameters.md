@@ -64,23 +64,25 @@ within EM received an additive motif contribution, whereas a previously absent
 motif edge was assigned beta Mij and was not required to meet the modified-
 cosine or matched-fragment threshold.
 
-## S4. Multiresolution module partition and parameter calibration
+## S4. Multiresolution module partition and parameter optimization
 
 The evidence-weighted graph was partitioned using weighted Louvain community
 detection. A fixed grid of 1,008 candidate settings was evaluated. Module-size
 constraints were applied during candidate-partition selection and not within the
-Louvain optimization itself. Candidate settings with either a largest module or
-representative-feature module exceeding 100 nodes were excluded.
+Louvain optimization itself. Candidate settings were excluded when either the
+largest module or the module containing the target feature ions exceeded 100
+nodes.
 
-Twelve representative dimer-related features were used solely for parameter
-calibration. Eligible partitions were ranked lexicographically by: (1) the
-number of representative features recovered in one module; (2) the size of
-that target module, favoring compactness; (3) representative-pair co-clustering;
+Before structural identification, a predefined group of target feature ions,
+including precursor ions at *m/z* 571.2803, 518.2184, and 559.2807 together with
+related feature ions, was used to optimize network partitioning. Eligible
+partitions were ranked lexicographically by: (1) the number of target feature
+ions co-clustered in one module; (2) the size of that module, favoring
+compactness; (3) the proportion of target-ion pairs assigned to the same module;
 (4) the number of nodes assigned to modules containing more than 10 nodes; and
-(5) weighted modularity. Thus, the representative set was not treated as an
-independent validation set. Structure annotations, fraction abundances, and
-biological activity labels were not used during network construction or module
-selection.
+(5) weighted modularity. These feature ions defined the parameter-optimization
+objective; their structural identities and bioactivities were not used to
+construct graph edges or determine module boundaries.
 
 ### Fixed search grid and selected setting
 
@@ -100,7 +102,7 @@ The selected setting generated 20,937 evidence-weighted relationships and 21
 modules containing at least three nodes. All 878 connected input nodes were
 assigned to these modules. Eighteen modules contained more than 10 nodes and
 collectively included 855 nodes. The largest module contained 96 nodes, and 11
-of the 12 representative features were recovered in M1.
+of the 12 target feature ions were co-clustered in M1.
 
 ## S5. Post hoc activity association
 
@@ -124,7 +126,7 @@ The workflow was implemented in Python 3.9 or later using NumPy 1.23 or later
 and NetworkX 3.2 or later. The public implementation reports version 0.5.0.
 Each run exports a JSON parameter record, the thresholded original edge table,
 the final node and relation tables, module summaries, post hoc activity tables,
-and the complete parameter-search table when calibration is enabled. The final
+and the complete parameter-search table when parameter optimization is enabled. The final
 relation table contains the modified-cosine score, matched-fragment count, ECV,
 ECV percentile, single-fragment similarity, fragment-pair similarity, integrated
 fragmentation similarity, original-edge base weight, additive motif weight,
@@ -145,9 +147,9 @@ ratio-dia --mgf spectra.mgf --edges-in modified_cosine_edges.csv
   --min-module-size 3 --random-seed 20260914 --output output_directory
 ```
 
-To repeat calibration rather than applying the selected setting directly, add
-`--parameter-search --representative-nodes representative_nodes.txt`. The
-representative-node file should contain one Alignment ID per line.
+To repeat parameter optimization rather than applying the selected setting
+directly, add `--parameter-search --target-feature-nodes target_feature_nodes.txt`.
+The target-feature file should contain one Alignment ID per line.
 
 ## S8. Interpretation limits
 
